@@ -8,7 +8,8 @@
             {{ csrf_field() }}
             <div class="page-title">
                 <h3>
-                    User <button type="submit" class="btn btn-primary">Send Email / Message</button>
+                    User
+                    <button type="submit" class="btn btn-primary">Send Email / Message</button>
                 </h3>
             </div><!--end page title-->
 
@@ -39,7 +40,8 @@
                                         <?php $i++; ?>
                                         <tr>
                                             <td>
-                                                <input type="checkbox" value="{{$user->id}}" name="users[]" id="select-one-{{ $i }}">
+                                                <input type="checkbox" value="{{$user->id}}" name="users[]"
+                                                       id="select-one-{{ $i }}">
                                             </td>
                                             <td>{{ $i }}</td>
                                             <td>{{ $user->email }}</td>
@@ -81,11 +83,11 @@
                                                 @if($user->is_subscribed == '1' )
                                                     <label>Subscribed / </label>
                                                     <button class="btn btn-success btn-xs btn-unsubscribe"
-                                                            data-id="<?php echo $user->id; ?>">Unsubscribe
+                                                            type="button" data-id="<?php echo $user->id; ?>">Unsubscribe
                                                     </button>
                                                 @elseif($user->is_subscribed == '0')
                                                     <button class="btn btn-success btn-xs btn-subscribe"
-                                                            data-id="<?php echo $user->id; ?>">Subscribe
+                                                            type="button" data-id="<?php echo $user->id; ?>">Subscribe
                                                     </button>
                                                     <label> / Unsubscribed</label>
                                                 @endif
@@ -95,13 +97,14 @@
                                             </td>
                                             <td>
                                                 @if($user->status == 'active')
-                                                    <button class="btn btn-success btn-xs">Active</button>
+                                                    <button type="button" class="btn btn-success btn-xs">Active</button>
                                                 @elseif($user->status == 'inactive')
-                                                    <button class="btn btn-warning btn-xs">In-Active</button>
+                                                    <button type="button" class="btn btn-warning btn-xs">In-Active
+                                                    </button>
                                                 @elseif($user->status == 'block')
-                                                    <button class="btn btn-danger btn-xs">Block</button>
+                                                    <button type="button" class="btn btn-danger btn-xs">Block</button>
                                                 @else
-                                                    <button class="btn btn-danger btn-xs">Remove</button>
+                                                    <button type="button" class="btn btn-danger btn-xs">Remove</button>
                                                 @endif
                                             </td>
                                             <td>
@@ -137,53 +140,51 @@
                 </div>
             </div>
         </form>
-        @stop
+    </div>
+@stop
 
 
-        @section('scripts')
-            <script type="text/javascript">
-                $('#select-all').click(function () {
-                    var size = $("#size-users").val();
-                    for (var i = 1; i <= size; i++) {
-                        $('#select-one-' + i).not(this).prop('checked', this.checked);
+@section('scripts')
+    <script type="text/javascript">
+        $('#select-all').click(function () {
+            var size = $("#size-users").val();
+            for (var i = 1; i <= size; i++) {
+                $('#select-one-' + i).not(this).prop('checked', this.checked);
+            }
+        });
+        $('.btn-unsubscribe').click(function () {
+            var id = $(this).attr('data-id');
+            if (confirm("You are sure want to Unsubscribe?")) {
+                $.ajax({
+                    url: "unsubsctibe_user/" + id, dataType: 'json', success: function (result) {
+
+                        if (result.status == 1) {
+                            location.reload();
+                        }
+                        else
+                            alert("Something went wrong");
+
                     }
                 });
-                $('.btn-unsubscribe').click(function () {
-                    var id = $(this).attr('data-id');
-                    if (confirm("You are sure want to Unsubscribe?")) {
-                        $.ajax({
-                            url: "unsubsctibe_user/" + id, dataType: 'json', success: function (result) {
-
-                                if (result.status == 1) {
-
-                                    location.reload();
-                                }
-                                else
-                                    alert("Something went wrong");
-
-                            }
-                        });
 
 
+            }
+
+        });
+        $('.btn-subscribe').click(function () {
+            var id = $(this).attr('data-id');
+            if (confirm("You are sure want to Subscribe?")) {
+                $.ajax({
+                    url: "subsctibe_user/" + id, dataType: 'json', success: function (result) {
+                        if (result.status == 1) {
+                            location.reload();
+                        }
+                        else {
+                            alert("Something went wrong");
+                        }
                     }
-
                 });
-                $('.btn-subscribe').click(function () {
-                    var id = $(this).attr('data-id');
-                    if (confirm("You are sure want to Subscribe?")) {
-                        $.ajax({
-                            url: "subsctibe_user/" + id, dataType: 'json', success: function (result) {
-
-                                if (result.status == 1) {
-
-                                    location.reload();
-                                }
-                                else {
-                                    alert("Something went wrong");
-                                }
-                            }
-                        });
-                    }
-                })
-            </script>
-@endsection
+            }
+        });
+    </script>
+@endsection()

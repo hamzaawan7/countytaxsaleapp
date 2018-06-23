@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\AuctionDate;
 use App\Favorite;
 use App\HomepageQuestions;
+use App\Sessions;
 use App\TrialAmounts;
 use App\TrialDays;
 use Illuminate\Http\Request;
@@ -13,6 +14,7 @@ use App\User;
 use App\Premium_user;
 use App\Product;
 use App\Payment;
+use Mockery\Exception;
 use Nexmo;
 use Session;
 use Hash;
@@ -29,18 +31,17 @@ class UserController extends Controller
             if (Auth::user()->type === 'admin') {
                 return redirect('admin-dashboard');
             } else {
-                 $payments = Payment::where('user_id', Auth::user()->id)->orderBy('id', 'DESC')->first();
-        if (!$payments) {
-            return redirect('payment-view')->with('warning', 'Card Credentials should be verified to use account !!');
-        }
-        $premiums = Premium_user::where('user_id', Auth::user()->id)->orderBy('id', 'DESC')->first();
-        if ($premiums->is_active == 0) {
+                $payments = Payment::where('user_id', Auth::user()->id)->orderBy('id', 'DESC')->first();
+                if (!$payments) {
+                    return redirect('payment-view')->with('warning', 'Card Credentials should be verified to use account !!');
+                }
+                $premiums = Premium_user::where('user_id', Auth::user()->id)->orderBy('id', 'DESC')->first();
+                if ($premiums->is_active == 0) {
+                    return redirect('subscriptions')->with('warning', 'You can use after once subscribe');
 
-                return redirect('subscriptions')->with('warning', 'You can use after once subscribe');
-
-            }else{
-                 return redirect('dashboard');
-            }
+                } else {
+                    return redirect('dashboard');
+                }
 
 
                 // if (Auth::user()->is_nexmo_verified) {
@@ -86,6 +87,14 @@ class UserController extends Controller
             'password' => 'required',
         ]);
         if (Auth::attempt(['email' => $request->email, 'password' => $request->password, 'status' => 'active', 'type' => 'user'])) {
+            $session = Sessions::where(['user_id' => Auth::user()->id])->first();
+            if (!empty($session)) {
+                Sessions::destroy($session->id);
+            }
+            Sessions::insert([
+                'user_id' => Auth::user()->id,
+                'session_key' => session()->getId(),
+            ]);
             $now = Carbon::now();
             $premiums = Premium_user::where('user_id', Auth::user()->id)->where('end_date', '>=', $now)->orderBy('id', 'DESC')->first();
             if (Auth::user()->is_nexmo_verified) {
@@ -243,8 +252,8 @@ class UserController extends Controller
             $now = Carbon::now();
             if (Auth::user()->is_nexmo_verified) {
                 $payments = Payment::where('user_id', Auth::user()->id)->orderBy('id', 'DESC')->first();
-                if(!$payments){
-                    return redirect('payment-view')->with('warning', 'Card Credentials should be verified to use account !!'); 
+                if (!$payments) {
+                    return redirect('payment-view')->with('warning', 'Card Credentials should be verified to use account !!');
                 }
                 $premiums = Premium_user::where('user_id', Auth::user()->id)->orderBy('id', 'DESC')->first();
                 // echo "<pre>";
@@ -300,7 +309,7 @@ class UserController extends Controller
                 }
                 $heart = "";
                 $favorite = Favorite::where('user_id', Auth::user()->id)->where('product_id', $product->id)->first();
-                if (!empty($favorite ) > 0) {
+                if (!empty($favorite) > 0) {
                     $heart = "#E24244";
                 } else {
                     $heart = "#bbb8b8";
@@ -328,9 +337,9 @@ class UserController extends Controller
         $now = Carbon::now();
 
         $payments = Payment::where('user_id', Auth::user()->id)->orderBy('id', 'DESC')->first();
-                if(!$payments){
-                    return redirect('payment-view')->with('warning', 'Card Credentials should be verified to use account !!'); 
-                }
+        if (!$payments) {
+            return redirect('payment-view')->with('warning', 'Card Credentials should be verified to use account !!');
+        }
         $premiums = Premium_user::where('user_id', Auth::user()->id)->orderBy('id', 'DESC')->first();
         if ($premiums) {
             if ($premiums->is_active == 0) {

@@ -76,6 +76,14 @@
                                                 <td>{{ $product->adjudged_value }}</td>
                                               </tr>
                                               <tr>
+                                                  <td>Land SF</td>
+                                                  <td>{{ $product->land_sf }}</td>
+                                              </tr>
+                                              <tr>
+                                                  <td>Living SF</td>
+                                                  <td>{{ $product->living_sf }}</td>
+                                              </tr>
+                                              <tr>
                                                 <td>Type</td>
                                                 <td>{{ $product->type }}</td>
                                               </tr>

@@ -25,7 +25,6 @@
                               enctype="multipart/form-data">
                             <?php echo e(csrf_field()); ?>
 
-                            <input type="hidden" name="users" value="<?= $users?>">
                             <label for="using" class="control-label"> Using</label>
                             <select class="form-control" name="using">
                                 <option value="0">Both</option>

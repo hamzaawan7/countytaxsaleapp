@@ -106,7 +106,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('signout', ['as' => 'signout', 'uses' => 'AdminController@getSignOut']);
 
     Route::post('/admin-selected-group', ['as' => 'admin-selected-group', 'uses' => 'AdminController@adminSelectedGroup']);
-    Route::get('/admin-send-group/{users}', ['as' => 'admin-send-group', 'uses' => 'AdminController@adminSendGroup']);
+    Route::get('/admin-send-group', ['as' => 'admin-send-group', 'uses' => 'AdminController@adminSendGroup']);
     Route::post('/admin-submit-group-message', ['as' => 'admin-submit-group-message', 'uses' => 'AdminController@adminSubmitGroupMessage']);
 
     Route::get('/admin-contact-messages', ['as' => 'admin-contact-messages', 'uses' => 'ContactController@ContactMessagesView']);

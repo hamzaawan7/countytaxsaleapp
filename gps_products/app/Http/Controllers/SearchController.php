@@ -8,6 +8,9 @@ use App\User;
 use App\Premium_user;
 use App\Payment;
 use App\Product;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Input;
 use Session;
 use Hash;
 use Carbon\Carbon;
@@ -44,57 +47,57 @@ class SearchController extends Controller
     public function productSearchResults(Request $request)
     {
 
-          $payments = Payment::where('user_id', Auth::user()->id)->orderBy('id', 'DESC')->first();
-                if(!$payments){
-                    return redirect('payment-view')->with('warning', 'Card Credentials should be verified to use account !!'); 
+        $payments = Payment::where('user_id', Auth::user()->id)->orderBy('id', 'DESC')->first();
+        if (!$payments) {
+            return redirect('payment-view')->with('warning', 'Card Credentials should be verified to use account !!');
+        }
+        $premiums = Premium_user::where('user_id', Auth::user()->id)->orderBy('id', 'DESC')->first();
+        // echo "<pre>";
+        // print_r($premiums);
+        // die;
+
+        if ($premiums) {
+            if ($premiums->is_active == 0) {
+
+                return redirect('subscriptions')->with('warning', 'You can use after once subscribe');
+
+            } else {
+                $user_ip = getenv('REMOTE_ADDR');
+                $geo = unserialize(file_get_contents("http://www.geoplugin.net/php.gp?ip=$user_ip"));
+                $lat = $geo['geoplugin_latitude'];
+                if ($lat == '') {
+                    $lats = 40.712775;
+                } else {
+                    $lats = $lat;
                 }
-                $premiums = Premium_user::where('user_id', Auth::user()->id)->orderBy('id', 'DESC')->first();
-                // echo "<pre>";
-                // print_r($premiums);
-                // die;
+                $lng = $geo['geoplugin_longitude'];
+                if ($lng == '') {
+                    $lngs = -95.32169469999997;
+                } else {
+                    $lngs = $lng;
+                }
+                // echo  $lats.$lngs;
 
-                if ($premiums) {
-                    if ($premiums->is_active == 0) {
+                $haversine = "(6371 * acos(cos(radians($lats)) * cos(radians(lat)) * cos(radians(lng) - radians($lngs)) + sin(radians($lats)) * sin(radians(lat))))";
+                $radius = 10;
 
-                        return redirect('subscriptions')->with('warning', 'You can use after once subscribe');
+                $products = Product::where(function ($query) use ($request) {
+                    $query->orWhere('address', 'like', '%' . $request->get('search') . '%');
+                    $query->orWhere('zipcode', 'like', '%' . $request->get('search') . '%');
+                    $query->orWhere('account', 'like', '%' . $request->get('search') . '%');
+                    $query->orWhere('cause', 'like', '%' . $request->get('search') . '%');
+                })
+                    //->selectRaw("*,{$haversine} AS distance")
+                    ->where('status', '!=', 'remove')
+                    //->whereRaw("{$haversine} < ?", [$radius])
+                    ->orderBy('id', 'DESC')
+                    ->distinct()
+                    ->paginate(15);
 
-                    }else{
-        $user_ip = getenv('REMOTE_ADDR');
-        $geo = unserialize(file_get_contents("http://www.geoplugin.net/php.gp?ip=$user_ip"));
-        $lat = $geo['geoplugin_latitude'];
-        if ($lat == '') {
-            $lats = 40.712775;
-        } else {
-            $lats = $lat;
+                // print_r($products); die;
+                return view('search-view', compact('products'));
+            }
         }
-        $lng = $geo['geoplugin_longitude'];
-        if ($lng == '') {
-            $lngs = -95.32169469999997;
-        } else {
-            $lngs = $lng;
-        }
-        // echo  $lats.$lngs;
-
-        $haversine = "(6371 * acos(cos(radians($lats)) * cos(radians(lat)) * cos(radians(lng) - radians($lngs)) + sin(radians($lats)) * sin(radians(lat))))";
-        $radius = 10;
-
-        $products = Product::where(function ($query) use ($request) {
-            $query->orWhere('address', 'like', '%' . $request->get('search') . '%');
-            $query->orWhere('zipcode', 'like', '%' . $request->get('search') . '%');
-            $query->orWhere('account', 'like', '%' . $request->get('search') . '%');
-            $query->orWhere('cause', 'like', '%' . $request->get('search') . '%');
-        })
-            //->selectRaw("*,{$haversine} AS distance")
-            ->where('status', '!=', 'remove')
-            //->whereRaw("{$haversine} < ?", [$radius])
-            ->orderBy('id', 'DESC')
-            ->distinct()
-            ->paginate(15);
-
-        // print_r($products); die;
-        return view('search-view', compact('products'));
-    }
-}
     }
 
 
@@ -153,59 +156,56 @@ class SearchController extends Controller
 
     public function productFilterMultiSearchResults(Request $request)
     {
+        $low_bid_value = $request->get('low_bid_value');
+        $high_bid_value = $request->get('high_bid_value');
+        $low_adjudged_value = $request->get('low_adjudged_value');
+        $high_adjudged_value = $request->get('high_adjudged_value');
+        $low_land_value = $request->get('low_land_value');
+        $high_land_value = $request->get('high_land_value');
+        $low_living_value = $request->get('low_building_value');
+        $high_living_value = $request->get('high_building_value');
+
         $products = Product::where(function ($query) use ($request) {
             if ($precinct = $request->get('precinct')) {
                 foreach ($precinct as $pre => $names) {
                     $query->orWhere('precinct', 'like', '%' . $names . '%');
                 }
             }
+        })->where(function ($query) use ($request) {
+            $query->orWhere('address', 'like', '%' . $request->get('search') . '%');
+            $query->orWhere('zipcode', 'like', '%' . $request->get('search') . '%');
+            $query->orWhere('account', 'like', '%' . $request->get('search') . '%');
+            $query->orWhere('cause', 'like', '%' . $request->get('search') . '%');
         })
-            ->where(function ($query) use ($request) {
-                $query->orWhere('address', 'like', '%' . $request->get('search') . '%');
-                $query->orWhere('zipcode', 'like', '%' . $request->get('search') . '%');
-                $query->orWhere('account', 'like', '%' . $request->get('search') . '%');
-                $query->orWhere('cause', 'like', '%' . $request->get('search') . '%');
+            ->where(function ($query) use ($low_bid_value, $high_bid_value) {
+                $query->whereRaw('CAST(REPLACE(REPLACE(IFNULL(min_bid,0),\',\',\'\'),\'$\',\'\') AS DECIMAL(10,0)) >= ' . $low_bid_value);
+                if ($high_bid_value != 100000) {
+                    $query->whereRaw('CAST(REPLACE(REPLACE(IFNULL(min_bid,0),\',\',\'\'),\'$\',\'\') AS DECIMAL(10,0)) <= ' . $high_bid_value);
+                }
+            })
+            ->where(function ($query) use ($low_adjudged_value, $high_adjudged_value) {
+                $query->whereRaw('CAST(REPLACE(REPLACE(IFNULL(adjudged_value,0),\',\',\'\'),\'$\',\'\') AS DECIMAL(10,0)) >= ' . $low_adjudged_value);
+                if ($high_adjudged_value != 100000) {
+                    $query->whereRaw('CAST(REPLACE(REPLACE(IFNULL(adjudged_value,0),\',\',\'\'),\'$\',\'\') AS DECIMAL(10,0)) <= ' . $high_adjudged_value);
+                }
+            })
+            ->where(function ($query) use ($low_land_value, $high_land_value) {
+                $query->whereRaw('CAST(REPLACE(REPLACE(IFNULL(land_sf,0),\',\',\'\'),\'$\',\'\') AS DECIMAL(10,0)) >= ' . $low_land_value);
+                if ($high_land_value != 10000) {
+                    $query->whereRaw('CAST(REPLACE(REPLACE(IFNULL(land_sf,0),\',\',\'\'),\'$\',\'\') AS DECIMAL(10,0)) <= ' . $high_land_value);
+                }
+            })
+            ->where(function ($query) use ($low_living_value, $high_living_value) {
+                $query->whereRaw('CAST(REPLACE(REPLACE(IFNULL(living_sf,0),\',\',\'\'),\'$\',\'\') AS DECIMAL(10,0)) >= ' . $low_living_value);
+                if ($high_living_value != 10000) {
+                    $query->whereRaw('CAST(REPLACE(REPLACE(IFNULL(living_sf,0),\',\',\'\'),\'$\',\'\') AS DECIMAL(10,0)) <= ' . $high_living_value);
+                }
             })
             ->where('status', '!=', 'remove')
             ->orderBy('id', 'DESC')
             ->distinct()
             ->paginate(15);
 
-        /*$adjudged_value = number_format($request->get('adjudged_value'), 2);
-        $bid_amount = number_format($request->get('bid_amount'), 2);*/
-        $adjudged_value = $request->get('adjudged_value');
-        $bid_amount = $request->get('bid_amount');
-        $landsf = $request->get('land_sqft');
-        $livingsf = $request->get('area_sqft');
-
-        foreach ($products as $key => $product) {
-            $product_adjudged_value = str_replace(",", "", $product->adjudged_value);
-            $product_adjudged_value = substr($product_adjudged_value, 1, -3);
-            $product_adjudged_value = intval($product_adjudged_value);
-            $product_bid_value = str_replace(",", "", $product->min_bid);
-            $product_bid_value = substr($product_bid_value, 1, -3);
-            $product_bid_value = intval($product_bid_value);
-            $product_land_sf = str_replace(",", "", $product->land_sf);
-            $product_land_sf = intval($product_land_sf);
-            $product_living_sf = str_replace(",", "", $product->land_sf);
-            $product_living_sf = intval($product_living_sf);
-            if ($product_adjudged_value < 1000 || $adjudged_value <= $product_adjudged_value) {
-                unset($products[$key]);
-            }
-            if ($product_bid_value < 1000 || $bid_amount <= $product_bid_value) {
-                unset($products[$key]);
-            }
-            if ($landsf <= $product_land_sf) {
-                unset($products[$key]);
-            }
-            if ($livingsf <= $product_living_sf) {
-                unset($products[$key]);
-            }
-        }
         return view('search-view', compact('products'));
-
-
     }
-
-
 }

@@ -69,7 +69,7 @@ class ContactController extends Controller
 
         $data['from'] = "support@CountyTaxSaleApp.org";
         $data['to'] = $contact->email;
-        $data['subject'] = "Query Reply";
+        $data['subject'] = "County Tax Sale App - Query Reply";
         $data['content'] = $request->text;
 
         Mail::send([], [], function($message) use ($data) {

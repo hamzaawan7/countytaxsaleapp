@@ -2,7 +2,7 @@
 @section('title', 'County Tax Sale App (CTSA) | Search')
 @section('content')
     <?php
-    use App\Favorite;
+    use App\Favorite;use App\Product;
     ?>
     <style>
         .successModal .modal-dialog {
@@ -82,7 +82,7 @@
                             <div class="col-xs-4">
                                 <div class="favorites">
                                     <?php
-                                        $favorite = Favorite::where('user_id', Auth::user()->id)->where('product_id', $product->id)->first();
+                                    $favorite = Favorite::where('user_id', Auth::user()->id)->where('product_id', $product->id)->first();
                                     ?>
                                     <a href="#" onclick="return false"
                                        id="product{{$product->id}}"
@@ -95,9 +95,9 @@
                                                 url: "{{ route('add-favorite', ['id' => $product->id ]) }}",
                                                 success: function (result) {
                                                     if (result == 1) {
-                                                        $('#product<?= $product->id ?>').css('color' , '#E24244');
+                                                        $('#product<?= $product->id ?>').css('color', '#E24244');
                                                     } else {
-                                                        $('#product<?= $product->id ?>').css('color' , '#bbb8b8');
+                                                        $('#product<?= $product->id ?>').css('color', '#bbb8b8');
                                                     }
                                                 }
                                             });

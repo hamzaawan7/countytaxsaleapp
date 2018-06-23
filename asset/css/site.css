@@ -41,3 +41,7 @@ html {
 body {
   min-height: 100%; !important;
 }
+#slider-container{
+  width:350px;
+  margin-left:30px;
+}

@@ -15,6 +15,7 @@
         <link href="<?php echo e(asset('asset/css/morris-0.4.3.min.css')); ?>" rel="stylesheet">
         <link href="<?php echo e(asset('asset/css/style.css')); ?>" rel="stylesheet">
         <link href="<?php echo e(asset('asset/css/bootstrap-multiselect.css')); ?>" rel="stylesheet">
+        <link href="<?php echo e(asset('asset/css/jquery-ui.css')); ?>" rel="stylesheet">
         <script src="<?php echo e(asset('asset/js/modernizr.js')); ?>"></script>
         <!-- Global site tag (gtag.js) - Google Analytics -->
         <script async src="https://www.googletagmanager.com/gtag/js?id=UA-8926455-6"></script>
@@ -35,12 +36,14 @@
         <script src="<?php echo e(asset('asset/js/bootstrap.min.js')); ?>"></script>
         <script src="<?php echo e(asset('asset/js/jquery.slimscroll.js')); ?>"></script>
         <script src="<?php echo e(asset('asset/js/metisMenu.js')); ?>"></script>
-         <script src="<?php echo e(asset('asset/js/core.js')); ?>"></script>
+        <script src="<?php echo e(asset('asset/js/core.js')); ?>"></script>
         <script src="<?php echo e(asset('asset/js/mediaquery.js')); ?>"></script>
         <script src="<?php echo e(asset('asset/js/equalize.js')); ?>"></script>
         <script src="<?php echo e(asset('asset/js/wow.min.js')); ?>"></script>
         <script src="<?php echo e(asset('asset/js/app.js')); ?>"></script>
         <script src="<?php echo e(asset('asset/js/bootstrap-multiselect.js')); ?>"></script>
+        <script src="<?php echo e(asset('asset/js/jquery-ui.js')); ?>"></script>
+        <script src="<?php echo e(asset('asset/js/jquery.ui.touch-punch.min.js')); ?>"></script>
         <script src="<?php echo e(asset('assets/validator.min.js')); ?>"></script>
         <style type="text/css">
             .alert{    

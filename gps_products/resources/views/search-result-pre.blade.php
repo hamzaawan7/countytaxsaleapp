@@ -34,7 +34,7 @@
             <div class="container">
                 <div class="row">
                     <div class="col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3  wow fadeInUp">
-                        <h4 class="page-header">Search By Precinct Or Create a Custom Filter</h4>
+                        <h4 class="page-header">Create a Custom Filter</h4>
                         <div class="col-xs-12" style="display: none;">
                             @if(count($products) >0)
                                 @foreach($products as $product)
@@ -122,10 +122,15 @@
                                     </span>
                                 @endif
                             </div>
-
-                            <div class="form-group">
-                                <label for="bid_amount">Adjudged Value</label>
-                                <div id='volume' class='slider'>
+                            <input type="hidden" id="low_bid_value" name="low_bid_value" value="0"/>
+                            <input type="hidden" id="high_bid_value" name="high_bid_value" value="100000"/>
+                            <input type="hidden" id="low_adjudged_value" name="low_adjudged_value" value="0"/>
+                            <input type="hidden" id="high_adjudged_value" name="high_adjudged_value" value="100000"/>
+                            <input type="hidden" id="low_land_value" name="low_land_value" value="0"/>
+                            <input type="hidden" id="high_land_value" name="high_land_value" value="10000"/>
+                            <input type="hidden" id="low_building_value" name="low_building_value" value="0"/>
+                            <input type="hidden" id="high_building_value" name="high_building_value" value="10000"/>
+                            {{--<div id='volume' class='slider'>
                                     <output class='slider-output'>$50,000</output>
                                     <!-- <output class='min'>1000</output>
                                     <output class='max'>2000000</output> -->
@@ -137,48 +142,49 @@
                                     <input class='slider-input' name="adjudged_value" type='range' value='50000'
                                            min='1000' max='100000'/>
                                     <span style="text-align: right;margin-top: -19px;;">$100,000+</span>
+                                </div>--}}
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="bid_amount">Bid Amount</label>
+                                        <div id="bid-container"></div>
+                                        <div style="float: left">$0</div>
+                                        <div id="bid_amount" style="text-align: center;">$0 - $100000</div>
+                                        <div style="float: right; margin-top: -16px">$100,000+</div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="form-group">
-                                <label for="bid_amount">Bid Amount</label>
-                                <div id='scrubber' class='slider'>
-                                    <output class='slider-output'>$50,000</output>
-                                    <div class='slider-track'>
-                                        <div class='slider-thumb'></div>
-                                        <div class='slider-level'></div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="adjudged_amount">Adjudged Value</label>
+                                        <div id="adjudged-container"></div>
+                                        <div style="float: left">$0</div>
+                                        <div id="adjudged_amount" style="text-align: center;">$0 - $100000</div>
+                                        <div style="float: right; margin-top: -16px">$100,000+</div>
                                     </div>
-                                    <span style="float: left;width: 30%;    margin-top: 5px;">$1,000</span>
-                                    <input class='slider-input' name="bid_amount" type='range' value='50000' min='1000'
-                                           max='100000'/>
-                                    <span style="text-align: right;margin-top: -19px;;">$100,000+</span>
                                 </div>
                             </div>
-                            <div class="form-group">
-                                <label for="land">Land (in Sq Ft)</label>
-                                <div id='land' class='slider'>
-                                    <output class='slider-output'>5,000</output>
-                                    <div class='slider-track'>
-                                        <div class='slider-thumb'></div>
-                                        <div class='slider-level'></div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="land_amount">Land (in Sq Ft)</label>
+                                        <div id="land-container"></div>
+                                        <div style="float: left">0</div>
+                                        <div id="land_amount" style="text-align: center;">0 - 10,000</div>
+                                        <div style="float: right; margin-top: -16px">10,000+</div>
                                     </div>
-                                    <span style="float: left;width: 30%;    margin-top: 5px;">0</span>
-                                    <input class='slider-input' name="land_sqft" type='range' value='5000' min='0'
-                                           max='10000'/>
-                                    <span style="text-align: right;margin-top: -19px;;">10,000+</span>
                                 </div>
                             </div>
-                            <div class="form-group">
-                                <label for="area">Building (Sq Ft)</label>
-                                <div id='area' class='slider'>
-                                    <output class='slider-output'>5,000</output>
-                                    <div class='slider-track'>
-                                        <div class='slider-thumb'></div>
-                                        <div class='slider-level'></div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="building_amount">Building (in Sq Ft)</label>
+                                        <div id="building-container"></div>
+                                        <div style="float: left">0</div>
+                                        <div id="building_amount" style="text-align: center;">0 - 10000</div>
+                                        <div style="float: right; margin-top: -16px">10,000+</div>
                                     </div>
-                                    <span style="float: left;width: 30%;    margin-top: 5px;">0</span>
-                                    <input class='slider-input' name="area_sqft" type='range' value='5000' min='0'
-                                           max='10000'/>
-                                    <span style="text-align: right;margin-top: -19px;;">10,000+</span>
                                 </div>
                             </div>
 

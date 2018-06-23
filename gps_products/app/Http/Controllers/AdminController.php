@@ -14,6 +14,8 @@ use Auth;
 use App\User;
 use App\Premium_user;
 use App\Product;
+use Illuminate\Support\Facades\Mail;
+use Nexmo\Laravel\Facade\Nexmo;
 use Session;
 use Hash;
 use Illuminate\Support\Facades\DB;
@@ -487,46 +489,53 @@ class AdminController extends Controller
 
     public function adminSelectedGroup(Request $request)
     {
-        $users = \GuzzleHttp\json_encode($request->users);
-        return redirect()->to(route('admin-send-group', $users));
+        session(['selected_users' => $request->users]);
+        return redirect()->to(route('admin-send-group'));
     }
 
     public function adminSendGroup(Request $request)
     {
-        $users = $request->users;
-        return view('admins.group_message', compact('users'));
+        return view('admins.group_message');
     }
 
     public function adminSubmitGroupMessage(Request $request)
     {
-        $users = $request->users;
+        $users = session()->get('selected_users');
         $using = $request->using;
         $text = $request->text;
-        foreach ($users as $uid) {
-            $user = User::where(['id' => $uid])->get();
-            $msg = "Dear " . $user->name . "," . "\n" . $text;
-            $email = $user->email;
-            if ($using == 0 || $using == 1) {
-                Mail::raw($msg, function ($message) use ($email) {
-                    $message->to($email)->subject('County Tax Sale App - Admin Message');
-                });
-            }
-            if ($using == 0 || $using == 2) {
-                $test_number = Nexmo::insights()->basic("1" . $user->phone_number);
-                if ($test_number['status'] == 0) {
-                    try {
-                        Nexmo::message()->send([
-                            'to' => $test_number['international_format_number'],
-                            'from' => '12015100626',
-                            'text' => $text
-                        ]);
-                    } catch (\Nexmo\Client\Exception\Request $e) {
-                        $nexmo_errors[] = $e->getMessage() . ' (Error Code: ' . $e->getCode() . ')';
+        if(!empty($users)){
+            foreach ($users as $uid) {
+                $user = User::where('id', $uid)->first();
+                $msg = "Dear " . $user->name . "," . "\n" . $text;
+                $email = $user->email;
+                if ($using == 0 || $using == 1) {
+                    $data['from'] = "stephanie@CountyTaxSaleApp.org";
+                    $data['to'] = $email;
+                    $data['subject'] = "Finish CTSA Sign-up!";
+                    $data['content'] = $msg;
+                    Mail::send([], [], function($message) use ($data) {
+                        $message->from($data['from']);
+                        $message->to($data['to']);
+                        $message->subject($data['subject']);
+                        $message->setBody($data['content'], 'text/html');
+                    });
+                }
+                if ($using == 0 || $using == 2) {
+                    $test_number = Nexmo::insights()->basic("1" . $user->phone_number);
+                    if ($test_number['status'] == 0) {
+                        try {
+                            Nexmo::message()->send([
+                                'to' => $test_number['international_format_number'],
+                                'from' => '12015100626',
+                                'text' => strip_tags($text)
+                            ]);
+                        } catch (\Nexmo\Client\Exception\Request $e) {
+                            $nexmo_errors[] = $e->getMessage() . ' (Error Code: ' . $e->getCode() . ')';
+                        }
                     }
                 }
             }
         }
-
         return redirect()->back()->with("success", "Message has been sent");
     }
 
